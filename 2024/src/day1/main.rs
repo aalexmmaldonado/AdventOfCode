@@ -11,9 +11,13 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     coord1_vec.sort();
     coord2_vec.sort();
 
+    // Answer for part 1
     let diff_sum = compute_diff_sum(&coord1_vec, &coord2_vec)?;
-
     println!("Difference sum is: {:?}", diff_sum);
+
+    // Answer for part 2
+    let sim_score = compute_sim_score(&coord1_vec, &coord2_vec)?;
+    println!("Similarity score is: {:?}", sim_score);
 
     Ok(())
 }
@@ -31,6 +35,14 @@ fn compute_diff_sum(vec1: &[u64], vec2: &[u64]) -> Result<i64, Box<dyn Error>> {
         .map(|(a, b)| (*a as i64 - *b as i64).abs())
         .sum();
     Ok(diff_sum)
+}
+
+fn compute_sim_score(vec1: &[u64], vec2: &[u64]) -> Result<i64, Box<dyn Error>> {
+    let sim_score: i64 = vec1
+        .iter()
+        .map(|&a| ((a as i64) * vec2.iter().filter(|&b| a == *b).count() as i64))
+        .sum();
+    Ok(sim_score)
 }
 
 fn read_coords(path: &str) -> Result<(Vec<u64>, Vec<u64>), Box<dyn Error>> {
