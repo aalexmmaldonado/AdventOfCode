@@ -1,43 +1,45 @@
+use std::error::Error;
 use std::fs;
 
-
-pub fn run() {
+pub fn run() -> Result<(), Box<dyn Error>> {
     println!("Running Day 1!");
+
     let path_coords = "./src/day1/input.txt";
-    match read_coords(path_coords) {
-        Ok((mut coord1_vec, mut coord2_vec)) => {
-            // Sort the vectors
-            coord1_vec.sort();
-            coord2_vec.sort();
-            match compute_diff_sum(coord1_vec, coord2_vec){
-                Ok(diff_sum) => println!("Difference sum is: {:?}", diff_sum),
-                Err(e) => eprint!("Error computing difference sum: {}", e)
-            }
-        }
-        Err(e) => eprintln!("Error reading coordinates: {}", e),
-    }
+    let (mut coord1_vec, mut coord2_vec) = read_coords(path_coords)?;
+
+    // We need to sort the vectors
+    coord1_vec.sort();
+    coord2_vec.sort();
+
+    let diff_sum = compute_diff_sum(&coord1_vec, &coord2_vec)?;
+
+    println!("Difference sum is: {:?}", diff_sum);
+
+    Ok(())
 }
 
-fn compute_diff_sum(vec1: Vec<u32>, vec2: Vec<u32>) -> Result<i64, String> {
+fn compute_diff_sum(vec1: &[u64], vec2: &[u64]) -> Result<i64, Box<dyn Error>> {
     // Check that vectors are same length
     if vec1.len() != vec2.len() {
-        return Err(String::from("vec1 and vec2 are not same length"));
-    } else {
-        // We need to compute the difference between each number in order.
-        let mut diff_sum: i64 = 0;
-        for (a, b) in vec1.iter().zip(vec2.iter()) {
-            diff_sum += (a).abs_diff(*b) as i64;
-        }
-        Ok(diff_sum)
+        return Err("vec1 and vec2 are not the same length".into());
     }
+
+    // We need to compute the difference between each number in order.
+    let diff_sum: i64 = vec1
+        .iter()
+        .zip(vec2.iter())
+        .map(|(a, b)| (*a as i64 - *b as i64).abs())
+        .sum();
+    Ok(diff_sum)
 }
 
-
-fn read_coords(path: &str) -> Result<(Vec<u32>, Vec<u32>), String> {
+fn read_coords(path: &str) -> Result<(Vec<u64>, Vec<u64>), Box<dyn Error>> {
     println!("Reading coordinates from {}", path);
-    let data = fs::read_to_string(path).expect("Unable to read file");
-    let mut coord1_vec: Vec<u32> = vec![];
-    let mut coord2_vec: Vec<u32> = vec![];
+    let data =
+        fs::read_to_string(path).map_err(|e| format!("Unable to read file {}: {}", path, e))?;
+
+    let mut coord1_vec: Vec<u64> = Vec::new();
+    let mut coord2_vec: Vec<u64> = Vec::new();
 
     for (line_no, line) in data.lines().enumerate() {
         // Skip empty lines
@@ -48,29 +50,23 @@ fn read_coords(path: &str) -> Result<(Vec<u32>, Vec<u32>), String> {
         // Split lines by whitespace
         let mut parts = line.split_whitespace();
 
-        // Parse lines and push to Vec
-        match (parts.next(), parts.next()) {
-            (Some(coord1_str), Some(coord2_str)) => {
-                // Parse each coordinate and append to Vec
-                let coord1 = coord1_str.parse::<u32>().map_err(|e| {
-                    format!("Error parsing coordinate 1 on line {}: {}", line_no + 1, e)
-                })?;
-                let coord2 = coord2_str.parse::<u32>().map_err(|e| {
-                    format!("Error parsing coordinate 2 on line {}: {}", line_no + 1, e)
-                })?;
-                coord1_vec.push(coord1);
-                coord2_vec.push(coord2);
-            }
-            _ => {
-                return Err(format!(
-                    "Invalid format on line {}: '{}'",
-                    line_no + 1,
-                    line
-                ))
-            }
-        }
+        let coord1_str = parts
+            .next()
+            .ok_or_else(|| format!("Missing first coordinate on line {}", line_no + 1))?;
+        let coord2_str = parts
+            .next()
+            .ok_or_else(|| format!("Missing second coordinate on line {}", line_no + 1))?;
+
+        let coord1: u64 = coord1_str
+            .parse()
+            .map_err(|e| format!("Error parsing coordinate 1 on line {}: {}", line_no + 1, e))?;
+        let coord2: u64 = coord2_str
+            .parse()
+            .map_err(|e| format!("Error parsing coordinate 2 on line {}: {}", line_no + 1, e))?;
+
+        coord1_vec.push(coord1);
+        coord2_vec.push(coord2);
     }
 
     Ok((coord1_vec, coord2_vec))
-
 }
