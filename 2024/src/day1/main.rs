@@ -1,4 +1,4 @@
-use std::{fs,cmp};
+use std::fs;
 
 
 pub fn run() {
@@ -23,9 +23,10 @@ fn compute_diff_sum(vec1: Vec<u32>, vec2: Vec<u32>) -> Result<i64, String> {
     if vec1.len() != vec2.len() {
         return Err(String::from("vec1 and vec2 are not same length"));
     } else {
+        // We need to compute the difference between each number in order.
         let mut diff_sum: i64 = 0;
         for (a, b) in vec1.iter().zip(vec2.iter()) {
-            diff_sum += (cmp::max(a, b) - cmp::min(a, b)) as i64;
+            diff_sum += (a).abs_diff(*b) as i64;
         }
         Ok(diff_sum)
     }
