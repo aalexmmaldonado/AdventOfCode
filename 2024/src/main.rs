@@ -2,6 +2,7 @@ use std::env;
 
 mod day1;
 mod day2;
+mod day3;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -17,6 +18,12 @@ fn main() {
         Some("2") => {
             if let Err(e) = day2::run() {
                 eprintln!("Error running Day 2: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Some("3") => {
+            if let Err(e) = day3::run() {
+                eprintln!("Error running Day 3: {}", e);
                 std::process::exit(1);
             }
         }
