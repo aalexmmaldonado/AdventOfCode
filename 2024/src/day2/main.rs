@@ -6,17 +6,17 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     let path_levels = "./src/day2/input.txt";
     let levels = read_levels(path_levels)?;
-    
-    let n_safe: _ = levels.iter()
-        .map(|a| is_safe_basic(a))
-        .filter(|b| *b)  // if it is true.
-        .collect::<Vec<bool>>()
-        .len();
-    println!("{:?}", n_safe);
+
+    let n_safe = levels.iter().filter(|&a| is_safe(a)).count();
+    assert_eq!(n_safe, 334);
+    println!("Safe levels (no dampener): {:?}", n_safe);
+
+    let n_safe_with_dampener = levels.iter().filter(|&a| is_safe_with_dampener(a)).count();
+    assert_eq!(n_safe_with_dampener, 400);
+    println!("Safe levels (with dampener): {:?}", n_safe_with_dampener);
 
     Ok(())
 }
-
 
 fn read_levels(path: &str) -> Result<Vec<Vec<u64>>, Box<dyn Error>> {
     println!("Reading levels from {}", path);
@@ -36,38 +36,64 @@ fn read_levels(path: &str) -> Result<Vec<Vec<u64>>, Box<dyn Error>> {
             .split_whitespace()
             .map(|a| a.parse::<u64>())
             .collect::<Result<Vec<_>, _>>()?;
-        
+
         levels.push(level);
     }
 
     Ok(levels)
 }
 
-fn is_safe_basic(nums: &[u64]) -> bool {
-    // Initialize flags for increasing and decreasing
-    let mut increasing = true;
-    let mut decreasing = true;
+fn is_safe(nums: &[u64]) -> bool {
+    if nums.len() < 2 {
+        return true;
+    }
 
-    // Iterate through the list
+    // Determine if the sequence is increasing or decreasing
+    let increasing = nums[1] > nums[0];
+    let decreasing = nums[1] < nums[0];
+
+    // If the first two numbers are equal, the sequence is neither increasing nor decreasing
+    if nums[1] == nums[0] {
+        return false;
+    }
+
+    // Check the differences between adjacent levels
     for i in 1..nums.len() {
-        if nums[i].abs_diff(nums[i - 1]) > 3 {
+        let diff = nums[i].abs_diff(nums[i - 1]);
+
+        // The difference must be at least 1 and at most 3
+        if diff < 1 || diff > 3 {
             return false;
         }
-        if nums[i] > nums[i - 1] {
-            decreasing = false;
-        }
-        if nums[i] < nums[i - 1] {
-            increasing = false;
-        }
-        if nums[i] == nums[i - 1] {
+
+        if increasing && nums[i] <= nums[i - 1] {
             return false;
         }
-        // If neither increasing nor decreasing, we can stop early
+
+        if decreasing && nums[i] >= nums[i - 1] {
+            return false;
+        }
+
         if !increasing && !decreasing {
             return false;
         }
     }
 
-    // If either increasing or decreasing, the list is monotonic
-    increasing || decreasing
+    true
+}
+
+fn is_safe_with_dampener(nums: &[u64]) -> bool {
+    if is_safe(nums) {
+        return true;
+    }
+
+    for i in 0..nums.len() {
+        let mut nums_without_i = nums.to_vec();
+        nums_without_i.remove(i);
+        if is_safe(&nums_without_i) {
+            return true;
+        }
+    }
+
+    false
 }
