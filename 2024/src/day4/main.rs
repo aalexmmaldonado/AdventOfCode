@@ -216,32 +216,6 @@ fn search_grid_for_x_word(grid: &Vec<Vec<&str>>) -> Vec<(usize, usize)> {
                 }
             }
 
-            // let next_loc = traverse_grid((i, j), &GridDirection::DownLeft, rows, cols, 1);
-            // match next_loc {
-            //     None => continue,
-            //     Some(next_loc) => {
-            //         let (row_next, col_next) = next_loc;
-            //         let next_letter = grid[row_next][col_next];
-            //         println!("{}", next_letter);
-            //         if next_letter != letter {
-            //             continue;
-            //         }
-            //         let opposite_loc =
-            //             traverse_grid((i, j), &GridDirection::DownRight, rows, cols, 1);
-            //         match opposite_loc {
-            //             None => continue,
-            //             Some(opposite_loc) => {
-            //                 let (row_next, col_next) = opposite_loc;
-            //                 let next_letter = grid[row_next][col_next];
-            //                 println!("{}", next_letter);
-            //                 if next_letter != letter {
-            //                     continue;
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-
             word_locs.push((i, j));
         }
     }
