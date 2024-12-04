@@ -11,10 +11,16 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let word = String::from("XMAS");
     let contents = read_file(&path_instructions)?;
     let grid = to_grid(&contents);
+
     let word_locs = search_grid_for_word(&grid, &word);
     let n_word_found = word_locs.len();
     assert_eq!(n_word_found, 2575);
     println!("Times '{}' was found: {:?}", word, n_word_found);
+
+    let x_word_locs = search_grid_for_x_word(&grid);
+    let n_word_found = x_word_locs.len();
+    assert!(n_word_found == 2041);
+    println!("Times 'MAS' was found in X pattern: {:?}", n_word_found);
 
     Ok(())
 }
@@ -133,6 +139,110 @@ fn search_grid_for_word(grid: &Vec<Vec<&str>>, word: &str) -> Vec<(usize, usize,
                     word_locs.push((i, j, direction));
                 }
             }
+        }
+    }
+
+    word_locs
+}
+
+fn get_other_letter(letter: &str) -> &str {
+    if letter == "S" {
+        return "M";
+    } else if letter == "M" {
+        return "S";
+    } else {
+        panic!("You have an invalid letter!");
+    };
+}
+
+fn search_grid_for_x_word(grid: &Vec<Vec<&str>>) -> Vec<(usize, usize)> {
+    let mut word_locs: Vec<(usize, usize)> = Vec::new();
+    let rows = grid.len();
+    let cols = grid[0].len();
+
+    let letter_center = "A";
+
+    for i in 0..rows {
+        for j in 0..cols {
+            if grid[i][j] != letter_center {
+                continue;
+            }
+
+            let mut letter = "";
+
+            let next_loc = traverse_grid((i, j), &GridDirection::UpLeft, rows, cols, 1);
+            match next_loc {
+                None => continue,
+                Some(next_loc) => {
+                    let (row_next, col_next) = next_loc;
+                    letter = grid[row_next][col_next];
+                    if (letter == "X") | (letter == "A") {
+                        continue;
+                    }
+                    let opposite_loc =
+                        traverse_grid((i, j), &GridDirection::DownRight, rows, cols, 1);
+                    match opposite_loc {
+                        None => continue,
+                        Some(opposite_loc) => {
+                            let (row_next, col_next) = opposite_loc;
+                            if grid[row_next][col_next] != get_other_letter(&letter) {
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+
+            let next_loc = traverse_grid((i, j), &GridDirection::UpRight, rows, cols, 1);
+            match next_loc {
+                None => continue,
+                Some(next_loc) => {
+                    let (row_next, col_next) = next_loc;
+                    letter = grid[row_next][col_next];
+                    if (letter == "X") | (letter == "A") {
+                        continue;
+                    }
+                    let opposite_loc =
+                        traverse_grid((i, j), &GridDirection::DownLeft, rows, cols, 1);
+                    match opposite_loc {
+                        None => continue,
+                        Some(opposite_loc) => {
+                            let (row_next, col_next) = opposite_loc;
+                            if grid[row_next][col_next] != get_other_letter(&letter) {
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // let next_loc = traverse_grid((i, j), &GridDirection::DownLeft, rows, cols, 1);
+            // match next_loc {
+            //     None => continue,
+            //     Some(next_loc) => {
+            //         let (row_next, col_next) = next_loc;
+            //         let next_letter = grid[row_next][col_next];
+            //         println!("{}", next_letter);
+            //         if next_letter != letter {
+            //             continue;
+            //         }
+            //         let opposite_loc =
+            //             traverse_grid((i, j), &GridDirection::DownRight, rows, cols, 1);
+            //         match opposite_loc {
+            //             None => continue,
+            //             Some(opposite_loc) => {
+            //                 let (row_next, col_next) = opposite_loc;
+            //                 let next_letter = grid[row_next][col_next];
+            //                 println!("{}", next_letter);
+            //                 if next_letter != letter {
+            //                     continue;
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+
+            word_locs.push((i, j));
         }
     }
 
