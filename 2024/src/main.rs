@@ -6,6 +6,8 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
+mod day7;
+mod day8;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -45,6 +47,18 @@ fn main() {
         Some("6") => {
             if let Err(e) = day6::run() {
                 eprintln!("Error running Day 6: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Some("7") => {
+            if let Err(e) = day7::run() {
+                eprintln!("Error running Day 7: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Some("8") => {
+            if let Err(e) = day8::run() {
+                eprintln!("Error running Day 8: {}", e);
                 std::process::exit(1);
             }
         }

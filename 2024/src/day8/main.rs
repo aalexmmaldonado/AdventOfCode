@@ -2,9 +2,9 @@ use std::error::Error;
 use std::fs;
 
 pub fn run() -> Result<(), Box<dyn Error>> {
-    println!("Running Day 6!");
+    println!("Running Day 8!");
 
-    let path_input = "./src/day6/input.txt";
+    let path_input = "./src/day8/input.txt";
     let contents = read_file(&path_input)?;
 
     Ok(())
