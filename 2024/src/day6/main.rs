@@ -18,7 +18,7 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     // Find all loop-causing obstruction positions
     let loop_positions = find_loop_positions(&mut map.clone(), (start_x, start_y), dir);
-    assert!(loop_positions.len() < 2925);
+    assert_eq!(loop_positions.len(), 1915);
 
     println!(
         "Number of loop-causing obstruction positions: {}",
@@ -53,12 +53,36 @@ impl Direction {
         }
     }
 
-    fn forward(&self, (x, y): (usize, usize)) -> (usize, usize) {
+    fn forward(&self, (x, y): (usize, usize), rows: usize, cols: usize) -> Option<(usize, usize)> {
         match self {
-            Direction::Up => (x.saturating_sub(1), y),
-            Direction::Right => (x, y + 1),
-            Direction::Down => (x + 1, y),
-            Direction::Left => (x, y.saturating_sub(1)),
+            Direction::Up => {
+                if x == 0 {
+                    None // Moving out of bounds (up)
+                } else {
+                    Some((x - 1, y))
+                }
+            }
+            Direction::Right => {
+                if y + 1 >= cols {
+                    None // Moving out of bounds (right)
+                } else {
+                    Some((x, y + 1))
+                }
+            }
+            Direction::Down => {
+                if x + 1 >= rows {
+                    None // Moving out of bounds (down)
+                } else {
+                    Some((x + 1, y))
+                }
+            }
+            Direction::Left => {
+                if y == 0 {
+                    None // Moving out of bounds (left)
+                } else {
+                    Some((x, y - 1))
+                }
+            }
         }
     }
 }
@@ -132,7 +156,12 @@ fn simulate(map: &[Vec<char>], start: (usize, usize), mut dir: Direction) -> usi
     visited.insert(pos);
 
     loop {
-        let next_pos = dir.forward(pos);
+        let next_pos = dir.forward(pos, rows, cols);
+        if next_pos.is_none() {
+            // Guard leaves the map
+            break;
+        }
+        let next_pos = next_pos.unwrap();
 
         if out_of_bounds(next_pos, rows, cols) {
             // Guard leaves the map
@@ -199,7 +228,12 @@ fn causes_loop(map: &[Vec<char>], start_pos: (usize, usize), start_dir: Directio
     state_counts.insert((pos, dir), 1u32);
 
     loop {
-        let next_pos = dir.forward(pos);
+        let next_pos = dir.forward(pos, rows, cols);
+        if next_pos.is_none() {
+            // Guard leaves the map
+            return false;
+        }
+        let next_pos = next_pos.unwrap();
 
         if out_of_bounds(next_pos, rows, cols) {
             // Guard leaves the map: no loop.
@@ -217,8 +251,7 @@ fn causes_loop(map: &[Vec<char>], start_pos: (usize, usize), start_dir: Directio
         let count = state_counts.entry((pos, dir)).or_insert(0);
         *count += 1;
 
-        // If the state has been encountered at least 3 times, we declare a loop.
-        if *count >= 3 {
+        if *count > 3 {
             return true;
         }
     }
