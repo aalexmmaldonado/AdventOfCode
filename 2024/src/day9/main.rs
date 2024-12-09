@@ -8,10 +8,10 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let path_input = "./src/day9/input.txt";
     let contents = read_file(&path_input)?;
     let file_blocks: Vec<String> = expand_disk_map(&contents);
-    // let file_blocks_defrag = defragment_file_blocks(&file_blocks);
-    // let checksum: u64 = compute_checksum(&file_blocks_defrag);
-    // assert!(checksum == 6340197768906);
-    // println!("File checksum: {:?}", checksum);
+    let file_blocks_defrag = defragment_file_blocks(&file_blocks);
+    let checksum: u64 = compute_checksum(&file_blocks_defrag);
+    assert!(checksum == 6340197768906);
+    println!("File checksum: {:?}", checksum);
 
     let file_blocks_defrag_chunks = defragment_file_blocks_chunks(&file_blocks);
     let checksum: u64 = compute_checksum(&file_blocks_defrag_chunks);
