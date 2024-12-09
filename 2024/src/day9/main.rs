@@ -8,10 +8,15 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let path_input = "./src/day9/input.txt";
     let contents = read_file(&path_input)?;
     let file_blocks: Vec<String> = expand_disk_map(&contents);
-    let file_blocks_defrag = defragment_file_blocks(&file_blocks);
-    let checksum: u64 = compute_checksum(&file_blocks_defrag);
-    assert!(checksum == 6340197768906);
-    println!("File checksum: {:?}", checksum);
+    // let file_blocks_defrag = defragment_file_blocks(&file_blocks);
+    // let checksum: u64 = compute_checksum(&file_blocks_defrag);
+    // assert!(checksum == 6340197768906);
+    // println!("File checksum: {:?}", checksum);
+
+    let file_blocks_defrag_chunks = defragment_file_blocks_chunks(&file_blocks);
+    let checksum: u64 = compute_checksum(&file_blocks_defrag_chunks);
+    assert!(checksum == 6363913128533);
+    println!("File checksum in blocks: {:?}", checksum);
 
     Ok(())
 }
@@ -81,6 +86,74 @@ fn defragment_file_blocks(file_blocks: &[String]) -> Vec<String> {
 
     defrag_blocks
 }
+
+
+fn defragment_file_blocks_chunks(file_blocks: &[String]) -> Vec<String> {
+    let mut defrag_blocks = file_blocks.to_vec(); // Clone into a new Vec<String>
+    let mut file_positions: Vec<(usize, usize, String)> = Vec::new();
+
+    // Extract file positions and IDs (from right to left)
+    let mut i = file_blocks.len();
+    while i > 0 {
+        i -= 1; // Decrement at the start to avoid out-of-bounds errors
+        if file_blocks[i] != "." && file_blocks[i] != "0" {
+            let end = i;
+            let id = file_blocks[i].clone();
+            while i > 0 && file_blocks[i - 1] == id {
+                i -= 1;
+            }
+            let start = i; // Start of the current file
+            file_positions.push((start, end, id));
+        }
+    }
+
+    // Try to move each file into the leftmost available space
+    for (start, end, id) in file_positions {
+        let file_length = end - start + 1;
+
+        let mut empty_start = None;
+        let mut empty_len = 0;
+
+        for i_empty in 0..defrag_blocks.len() {
+            if defrag_blocks[i_empty] == "." {
+                // Start counting empty space
+                if empty_start.is_none() {
+                    empty_start = Some(i_empty);
+                }
+                empty_len += 1;
+
+                // Check if the file can fit in the empty space
+                if empty_len == file_length {
+                    if let Some(empty_start_idx) = empty_start {
+                        if empty_start_idx > start {
+                            break; // Skip if the empty index is higher than the file index
+                        }
+
+                        // Move the file to the empty space
+                        for j in 0..file_length {
+                            defrag_blocks[empty_start_idx + j] = id.clone();
+                        }
+
+                        // Clear the original file blocks
+                        for j in start..=end {
+                            defrag_blocks[j] = ".".to_string();
+                        }
+
+                        // File has been moved, exit the loop
+                        break;
+                    }
+                }
+            } else {
+                // Reset empty space tracking
+                empty_start = None;
+                empty_len = 0;
+            }
+        }
+    }
+
+    defrag_blocks
+}
+
 
 fn compute_checksum(file_blocks: &[String]) -> u64 {
     file_blocks
