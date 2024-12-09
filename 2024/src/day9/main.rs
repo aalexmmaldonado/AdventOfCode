@@ -1,4 +1,3 @@
-use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::fs;
 
@@ -87,7 +86,6 @@ fn defragment_file_blocks(file_blocks: &[String]) -> Vec<String> {
     defrag_blocks
 }
 
-
 fn defragment_file_blocks_chunks(file_blocks: &[String]) -> Vec<String> {
     let mut defrag_blocks = file_blocks.to_vec(); // Clone into a new Vec<String>
     let mut file_positions: Vec<(usize, usize, String)> = Vec::new();
@@ -153,7 +151,6 @@ fn defragment_file_blocks_chunks(file_blocks: &[String]) -> Vec<String> {
 
     defrag_blocks
 }
-
 
 fn compute_checksum(file_blocks: &[String]) -> u64 {
     file_blocks
