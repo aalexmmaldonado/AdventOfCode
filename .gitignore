@@ -14,12 +14,4 @@ Cargo.lock
 *.pdb
 
 # 2024
-2024/src/day1/*.txt
-2024/src/day2/*.txt
-2024/src/day3/*.txt
-2024/src/day4/*.txt
-2024/src/day5/*.txt
-2024/src/day6/*.txt
-2024/src/day7/*.txt
-2024/src/day8/*.txt
-2024/src/day9/*.txt
+2024/src/day*/*.txt
