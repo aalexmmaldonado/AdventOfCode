@@ -10,8 +10,12 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 
     let map = parse_map(&contents);
     let total_score = calculate_trailhead_scores(&map);
-
+    assert!(total_score == 820);
     println!("Total score of all trailheads: {}", total_score);
+
+    let total_rating = calculate_trailhead_ratings(&map);
+    assert!(total_rating == 1786);
+    println!("Total rating of all trailheads: {}", total_rating);
 
     Ok(())
 }
@@ -91,4 +95,64 @@ fn bfs_trailhead_score(map: &[Vec<u32>], start_row: isize, start_col: isize) -> 
     }
 
     score
+}
+
+// Calculate total trailhead ratings
+fn calculate_trailhead_ratings(map: &[Vec<u32>]) -> u32 {
+    let mut total_rating = 0;
+
+    for row in 0..map.len() {
+        for col in 0..map[0].len() {
+            if map[row][col] == 0 {
+                total_rating +=
+                    dfs_trailhead_rating(map, row as isize, col as isize, &mut HashSet::new());
+            }
+        }
+    }
+
+    total_rating
+}
+
+// Depth-First Search to count all distinct hiking trails
+fn dfs_trailhead_rating(
+    map: &[Vec<u32>],
+    row: isize,
+    col: isize,
+    visited: &mut HashSet<(isize, isize)>,
+) -> u32 {
+    // If we reach height 9, this is a valid trail
+    if map[row as usize][col as usize] == 9 {
+        return 1;
+    }
+
+    let directions = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+    let mut trail_count = 0;
+
+    // Temporarily mark the current position as visited
+    visited.insert((row, col));
+
+    for &(dr, dc) in &directions {
+        let new_row = row + dr;
+        let new_col = col + dc;
+
+        if new_row >= 0
+            && new_col >= 0
+            && (new_row as usize) < map.len()
+            && (new_col as usize) < map[0].len()
+            && !visited.contains(&(new_row, new_col))
+        {
+            let current_height = map[row as usize][col as usize];
+            let next_height = map[new_row as usize][new_col as usize];
+
+            // Continue the trail only if the height increases by 1
+            if next_height == current_height + 1 {
+                trail_count += dfs_trailhead_rating(map, new_row, new_col, visited);
+            }
+        }
+    }
+
+    // Backtrack: unmark the current position as visited
+    visited.remove(&(row, col));
+
+    trail_count
 }
