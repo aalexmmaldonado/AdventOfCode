@@ -3,6 +3,7 @@ use std::env;
 mod day1;
 mod day10;
 mod day11;
+mod day12;
 mod day2;
 mod day3;
 mod day4;
@@ -80,6 +81,12 @@ fn main() {
         Some("11") => {
             if let Err(e) = day11::run() {
                 eprintln!("Error running Day 11: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Some("12") => {
+            if let Err(e) = day12::run() {
+                eprintln!("Error running Day 12: {}", e);
                 std::process::exit(1);
             }
         }

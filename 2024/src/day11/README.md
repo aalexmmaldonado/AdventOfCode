@@ -1,3 +1,3 @@
-# Day 10
+# Day 11
 
-[Problem statement](https://adventofcode.com/2024/day/10)
+[Problem statement](https://adventofcode.com/2024/day/11)
