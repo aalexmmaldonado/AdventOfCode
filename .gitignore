@@ -13,5 +13,13 @@ Cargo.lock
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
 
-# 2024
-2024/src/day*/*.txt
+# 24
+24/src/day*/*.txt
+# 25
+25/src/day*/*.txt
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+.DS_Store
+

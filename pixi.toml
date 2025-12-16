@@ -1,0 +1,11 @@
+[workspace]
+authors = ["Alex Maldonado <alex@scient.ing>"]
+channels = ["conda-forge"]
+name = "AdventOfCode"
+platforms = ["linux-64", "osx-64", "osx-arm64"]
+version = "25.1.0"
+
+[tasks]
+
+[dependencies]
+rust = ">=1.92.0"
