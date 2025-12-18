@@ -2,6 +2,8 @@ use std::env;
 
 mod day00;
 mod day01;
+mod day02;
+mod day03;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -20,10 +22,22 @@ fn main() {
                 std::process::exit(1);
             }
         }
+        Some("02") => {
+            if let Err(e) = day02::run() {
+                eprintln!("Error running Day 02: {}", e);
+                std::process::exit(1);
+            }
+        }
+        Some("03") => {
+            if let Err(e) = day03::run() {
+                eprintln!("Error running Day 03: {}", e);
+                std::process::exit(1);
+            }
+        }
         Some(_) => {
             println!("Invalid day!");
         }
-        None => {
+        _ => {
             println!("No day specified!");
         }
     }
