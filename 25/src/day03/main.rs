@@ -10,6 +10,8 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let max_total_voltage_2 = get_max_total_voltage(&banks, 2);
     assert_eq!(max_total_voltage_2, 17554);
     println!("Part 1: {:?}", &max_total_voltage_2);
+    let max_total_voltage_12 = get_max_total_voltage(&banks, 12);
+    println!("Part 2: {:?}", &max_total_voltage_12);
     Ok(())
 }
 
