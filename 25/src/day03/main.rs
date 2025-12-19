@@ -7,11 +7,12 @@ pub fn run() -> Result<(), Box<dyn Error>> {
     let input: String = fs::read_to_string("./src/day03/input.txt")?;
 
     let banks: Vec<Bank> = parse_banks(&input)?;
-    let max_total_voltage_2 = get_max_total_voltage(&banks, 2);
-    assert_eq!(max_total_voltage_2, 17554);
-    println!("Part 1: {:?}", &max_total_voltage_2);
-    let max_total_voltage_12 = get_max_total_voltage(&banks, 12);
-    println!("Part 2: {:?}", &max_total_voltage_12);
+    let max_total_voltage_p1 = get_max_total_voltage(&banks, 2);
+    assert_eq!(max_total_voltage_p1, 17554);
+    println!("Part 1: {:?}", &max_total_voltage_p1);
+    let max_total_voltage_p2 = get_max_total_voltage(&banks, 12);
+    assert_eq!(max_total_voltage_p2, 175053592950232);
+    println!("Part 2: {:?}", &max_total_voltage_p2);
     Ok(())
 }
 
