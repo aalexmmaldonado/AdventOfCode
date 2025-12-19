@@ -4,7 +4,7 @@ use std::fs;
 pub fn run() -> Result<(), Box<dyn Error>> {
     println!("Running Day 05!");
 
-    let input: String = fs::read_to_string("./src/day05/input.txt")?;
+    let _input: String = fs::read_to_string("./src/day05/input.txt")?;
 
     Ok(())
 }

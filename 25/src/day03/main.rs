@@ -19,7 +19,6 @@ pub fn run() -> Result<(), Box<dyn Error>> {
 #[derive(Debug)]
 struct Voltage {
     val: u8,
-    pos: u64,
 }
 
 #[derive(Debug)]
@@ -55,12 +54,12 @@ fn find_max_bank_voltage(banks: &[Bank], n_batteries_use: u64) -> Vec<Vec<Voltag
         for _ in 0..n_batteries_use {
             let max_idx: usize;
             let max_val: u8;
-            if (start_idx != stop_idx) && (start_idx != n_batts - 1 as usize) {
+            if (start_idx != stop_idx) && (start_idx != n_batts - 1_usize) {
                 (max_idx, max_val) = bank.batts[..stop_idx]
                     .iter()
                     .enumerate()
                     .skip(start_idx)
-                    .max_by(|a, b| a.1.cmp(&b.1).then_with(|| b.0.cmp(&a.0)))
+                    .max_by(|a, b| a.1.cmp(b.1).then_with(|| b.0.cmp(&a.0)))
                     .map(|(i, &v)| (i, v))
                     .unwrap();
             } else {
@@ -68,10 +67,7 @@ fn find_max_bank_voltage(banks: &[Bank], n_batteries_use: u64) -> Vec<Vec<Voltag
                 max_val = bank.batts[start_idx];
             }
 
-            voltages.push(Voltage {
-                val: max_val,
-                pos: max_idx as u64,
-            });
+            voltages.push(Voltage { val: max_val });
             start_idx = max_idx + 1;
             stop_idx += 1;
         }
@@ -94,10 +90,8 @@ fn get_bank_voltage(voltages: &[Voltage]) -> u64 {
 }
 
 fn get_max_total_voltage(banks: &[Bank], n_batteries_use: u64) -> u64 {
-    let total_voltage = find_max_bank_voltage(banks, n_batteries_use)
+    find_max_bank_voltage(banks, n_batteries_use)
         .into_iter()
         .map(|x| get_bank_voltage(&x))
-        .sum();
-
-    total_voltage
+        .sum()
 }
