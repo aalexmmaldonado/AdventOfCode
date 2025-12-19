@@ -22,4 +22,5 @@ Cargo.lock
 !.pixi/config.toml
 
 .DS_Store
+profile*
 

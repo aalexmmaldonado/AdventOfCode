@@ -9,3 +9,5 @@ version = "25.1.0"
 
 [dependencies]
 rust = ">=1.92.0"
+hyperfine = ">=1.20.0,<2"
+samply = ">=0.13.1,<0.14"

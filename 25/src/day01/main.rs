@@ -4,93 +4,89 @@ use std::fs;
 pub fn run() -> Result<(), Box<dyn Error>> {
     println!("Running Day 01!");
 
-    let input: String = fs::read_to_string("./src/day01/input.txt")?;
-    let turns: Vec<Turn> = parse_instructions(&input)?;
+    // Want to avoid heap-allocated string. We will use memory maps instead.
+    let input = fs::read("./src/day01/input.txt")?;
 
-    // Part 1
-    let zeros_count: u64 = run_turns(&turns, 50, false);
-    assert_eq!(zeros_count, 1040);
-    println!("Number of zero ticks: {}", zeros_count);
-
-    // Part 2
-    let zeros_count_with_passes: u64 = run_turns(&turns, 50, true);
-    println!(
-        "Number of zero ticks with passes: {}",
-        zeros_count_with_passes
-    );
+    let (p1, p2) = solve(&input);
+    assert_eq!(p1, 1040);
+    println!("Part 1: {}", p1);
+    assert_eq!(p2, 6027);
+    println!("Part 2: {}", p2);
     Ok(())
 }
 
-#[derive(Debug)]
-struct Turn {
-    step: i64,
-}
+fn solve(input: &[u8]) -> (u64, u64) {
+    let mut p1_count: u64 = 0;
+    let mut p2_count: u64 = 0;
 
-fn parse_instructions(contents: &str) -> Result<Vec<Turn>, Box<dyn Error>> {
-    let mut turns: Vec<Turn> = vec![];
-    let mut step: u64;
-
-    for line in contents.lines() {
-        step = line[1..].parse::<u64>()?;
-
-        let dir = line.chars().next().unwrap();
-        let turn = Turn {
-            step: {
-                if dir == 'L' {
-                    step as i64 * -1
-                } else {
-                    step as i64
-                }
-            },
-        };
-
-        turns.push(turn);
-    }
-    Ok(turns)
-}
-
-fn perform_turn(value: &i64, turn: &Turn, track_zero_passes: bool) -> (i64, i64) {
+    let mut current_val: i64 = 50;
     let range_size: i64 = 100;
 
-    let start = *value;
-    let end = start + turn.step;
-    let new_value = end.rem_euclid(range_size);
+    let mut i = 0;
+    let len = input.len();
 
-    let mut n_zero_passes = 0;
+    while i < len {
+        let b = input[i];
 
-    if track_zero_passes {
-        if turn.step > 0 {
-            // MOVING RIGHT (Positive)
-            // We want to know how many multiples of 100 are in the range (start, end).
-            // We exclude 'end' because the main loop checks if we land on 0.
-            // Formula: floor((end - 1) / 100) - floor(start / 100)
-            n_zero_passes = (end - 1).div_euclid(range_size) - start.div_euclid(range_size);
+        // If it's not 'L' or 'R', skip.
+        if b < b'A' {
+            i += 1;
+            continue;
+        }
+
+        // Branchless Direction Parsing
+        // 'L' is 0x4C (0100 1100) -> bit 1 is 0
+        // 'R' is 0x52 (0101 0010) -> bit 1 is 1
+        // We isolate bit 1:
+        // L: (0x4C & 2) = 0. We want -1. -> (0 - 1) = -1
+        // R: (0x52 & 2) = 2. We want  1. -> (2 - 1) = 1
+        let sign = (b & 2) as i64 - 1;
+        i += 1;
+
+        let mut mag: i64 = 0;
+        loop {
+            if i >= len {
+                break;
+            }
+
+            // "trick": wrapping_sub maps '0'..'9' to 0..9.
+            // Any other char becomes a large u8 > 9.
+            // Eliminates one branch (checking >= '0' AND <= '9').
+            let digit = input[i].wrapping_sub(b'0');
+            if digit > 9 {
+                break;
+            }
+
+            mag = (mag << 3) + (mag << 1) + digit as i64;
+            i += 1;
+        }
+
+        let step = mag * sign;
+
+        let start = current_val;
+        let end = start + step;
+
+        current_val = end.rem_euclid(range_size);
+
+        // Part 1
+        if current_val == 0 {
+            p1_count += 1;
+            p2_count += 1;
+        }
+
+        // Part 2
+        if step > 0 {
+            let passes = (end - 1).div_euclid(range_size) - start.div_euclid(range_size);
+            if passes > 0 {
+                p2_count += passes as u64;
+            }
         } else {
-            // MOVING LEFT (Negative)
-            // We want to know how many multiples of 100 are in the range (end, start).
-            // We exclude 'end' here as well.
-            // Formula: floor((start - 1) / 100) - floor(end / 100)
-            n_zero_passes = (start - 1).div_euclid(range_size) - end.div_euclid(range_size);
+            let passes = (start - 1).div_euclid(range_size) - end.div_euclid(range_size);
+            if passes > 0 {
+                p2_count += passes as u64;
+            }
         }
     }
 
-    (new_value, n_zero_passes)
-}
-
-fn run_turns(turns: &Vec<Turn>, start: i64, track_zero_passes: bool) -> u64 {
-    let mut current_value: i64 = start;
-    let mut zeros_count: u64 = 0;
-    let mut n_zero_passes: i64;
-
-    for turn in turns {
-        (current_value, n_zero_passes) = perform_turn(&current_value, turn, track_zero_passes);
-        if current_value == 0 {
-            zeros_count += 1;
-        }
-        if n_zero_passes > 0 {
-            zeros_count += n_zero_passes as u64
-        }
-    }
-
-    zeros_count
+    (p1_count, p2_count)
 }
